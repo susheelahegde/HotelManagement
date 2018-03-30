@@ -33,6 +33,6 @@ public class CassandraConfig extends AbstractCassandraConfiguration {
 
     @Override
     protected String getKeyspaceName() {
-        return "foodpoc";
+        return "hotel_management";
     }
 }

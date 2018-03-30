@@ -58,15 +58,10 @@ public class FoodServiceImpl implements FoodService{
 					return null;
 				}
 			}
-			
-	        System.out.println("Food entity: "+foodEntity.toString());
-	        System.out.println("Asset entity: "+asset.toString());
 	        
 	        this.assetRepo.save(asset);
-	        System.out.println("image stored");
 	        this.foodRepository.save(foodEntity);
 		} else {
-			//Error needs to handle
 			System.out.println("Hotel not food");
 			return null;
 		}

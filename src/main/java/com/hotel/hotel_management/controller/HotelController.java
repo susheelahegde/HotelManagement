@@ -2,6 +2,8 @@ package com.hotel.hotel_management.controller;
 
 import java.util.List;
 
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -20,6 +22,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.hotel.hotel_management.entity.AssetEntity;
 import com.hotel.hotel_management.entity.FoodEntity;
@@ -29,6 +33,8 @@ import com.hotel.hotel_management.service.HotelService;
 
 import io.swagger.annotations.ApiOperation;
 import utils.Assetcreator;
+
+import javax.rmi.CORBA.Util;
 
 @RestController
 @RequestMapping(value = "/hotels")
@@ -40,18 +46,46 @@ public class HotelController {
     @Autowired
     private FoodService foodService;
 
+    public static final Logger LOG = LoggerFactory.getLogger(HotelController.class);
+    ResponseEntity responseEntity = null;
     /*========================================Hotel Apis===========================================================*/
     
     //Add hotel
     @ApiOperation(value = "Add new Hotel")
     @RequestMapping(value = "/add_hotel", method = RequestMethod.POST, produces = "application/json")
-    public ResponseEntity<HotelEntity> saveHotel(@RequestBody HotelEntity hotelEntity) {     
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Success"),
+            @ApiResponse(code = 400, message = "Bad Request"), @ApiResponse(code = 404, message = "Not Found"),
+            @ApiResponse(code = 500, message = "Internal Server Error") })
+
+    public ResponseEntity<HotelEntity> saveHotel(@RequestBody HotelEntity hotelEntity) {
+
+        try {
+
+            if(hotelEntity.getContact_number().equals("")){
+                responseEntity = ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("{\"message\":" + "\"" + "contact number is empty" + "\"}");
+                return responseEntity;
+            } else if (hotelEntity.getHotel_name().equals("")){
+                responseEntity = ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("{\"message\":" + "\"" + "hotel name is empty" + "\"}");
+                return responseEntity;
+            } else if (hotelEntity.getHotel_location().equals("")){
+                responseEntity = ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("{\"message\":" + "\"" + "hotel location is empty" + "\"}");
+                return responseEntity;
+            }
+
+        }catch ( Exception e){
+            LOG.error("Exception >> Hotel controller >> add hotel"+ Util.wrapException(e));
+        }
+
         return ResponseEntity.ok().body(hotelService.save(hotelEntity));
     }
     
     //Delete Hotel
     @ApiOperation(value = "Delete entire hotel and its stuffs")
-    @DeleteMapping(path = "/delete/hotel/{hotelId}")
+    @DeleteMapping(path = "/delete_hotel/{hotelId}")
     public ResponseEntity<String> deleteHotel(@PathVariable("hotelId") String hotelId) {
         this.hotelService.deleteHotel(hotelId);
         return new ResponseEntity<>("Deleted", HttpStatus.ACCEPTED);
